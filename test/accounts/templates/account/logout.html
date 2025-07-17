@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_style %}
+  <style>
+    .logout-container {
+      max-width: 350px;
+      margin: 80px auto 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(30,41,59,0.08);
+      padding: 42px 30px 32px 30px;
+      text-align: center;
+    }
+    .logout-container h2 {
+      color: #1e293b;
+      margin-bottom: 28px;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .logout-container a {
+      display: inline-block;
+      background: #38bdf8;
+      color: #fff;
+      border-radius: 5px;
+      padding: 12px 32px;
+      font-size: 1.07rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.18s;
+      box-shadow: 0 2px 8px rgba(30,41,59,0.07);
+    }
+    .logout-container a:hover {
+      background: #0ea5e9;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="logout-container">
+    <h2>로그아웃 되었습니다.</h2>
+    <a href="{% url 'account_login' %}?next=">다시 로그인</a>
+    {#<a href="{% url 'account_login' %}">다시 로그인</a> #}
+    {#<a href="/accounts/login/">다시 로그인</a>#}
+  </div>
+{% endblock %}

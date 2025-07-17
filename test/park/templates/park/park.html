@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .container {
+        max-width: 420px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(30,41,59,0.09);
+        padding: 32px 28px 24px 28px;
+    }
+    h1 {
+        text-align: center;
+        color: #1e293b;
+        margin-bottom: 24px;
+        font-size: 1.7rem;
+        letter-spacing: 1px;
+    }
+    form label {
+        display: block;
+        margin: 16px 0 6px 0;
+        color: #334155;
+        font-weight: 500;
+    }
+    form input,
+    form select {
+        width: 94%;
+        padding: 10px 12px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 5px;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        background: #f1f5f9;
+        transition: border 0.2s;
+    }
+    form input:focus,
+    form select:focus {
+        border: 1.5px solid #38bdf8;
+        outline: none;
+        background: #e0f2fe;
+    }
+    .main-btn {
+        width: 100%;
+        background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%);
+        color: #fff;
+        border: none;
+        padding: 13px;
+        border-radius: 5px;
+        font-size: 1.13rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        box-shadow: 0 2px 8px rgba(30,41,59,0.07);
+        transition: background 0.2s;
+    }
+    .main-btn:hover {
+        background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+    }
+    .save-btn {
+        width: 100%;
+        background: linear-gradient(90deg, #f59e42 0%, #fbbf24 100%);
+        color: #fff;
+        border: none;
+        padding: 13px;
+        border-radius: 5px;
+        font-size: 1.13rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 24px;
+        box-shadow: 0 2px 8px rgba(30,41,59,0.07);
+        transition: background 0.2s;
+        letter-spacing: 1px;
+    }
+    .save-btn:hover {
+        background: linear-gradient(90deg, #fbbf24 0%, #f59e42 100%);
+    }
+    .result-section {
+        background: linear-gradient(135deg, #e0f2fe 0%, #fff7ed 100%);
+        border-radius: 12px;
+        margin-top: 30px;
+        padding: 24px 18px;
+        text-align: center;
+        color: #0f172a;
+        box-shadow: 0 2px 12px rgba(30,41,59,0.07);
+        animation: fadeIn 0.6s;
+        border: 1.5px solid #bae6fd;
+        position: relative;
+    }
+    .result-section h2 {
+        color: #f59e42;
+        margin-bottom: 14px;
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+    }
+    .result-badge {
+        display: inline-block;
+        background: #38bdf8;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 16px;
+        padding: 6px 18px;
+        font-size: 1.08rem;
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 8px rgba(30,41,59,0.06);
+    }
+    .result-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 10px 0;
+    }
+    .result-list li {
+        font-size: 1.08rem;
+        margin: 8px 0;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+    }
+    .result-list li .icon {
+        font-size: 1.1em;
+        margin-right: 2px;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px);}
+        to   { opacity: 1; transform: translateY(0);}
+    }
+    @media (max-width: 600px) {
+        .container { padding: 16px 6px; }
+    }
+</style>
+
+<div class="container">
+    <h1>불법주정차 예측 서비스</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label>날짜 <span style="font-size:0.95em;color:#64748b;">(예: 2025-07-07)</span></label>
+        <input type="date" name="day" required value="{{ result_date|default:'' }}">
+
+        <label>시간 <span style="font-size:0.95em;color:#64748b;">(0~23시)</span></label>
+        <input type="number" name="hour" min="0" max="23" required value="{{ result_time|default:0 }}">
+
+        <label>기온(℃)</label>
+        <input type="number" step="0.1" name="temp" required value="{{ temp|default:'' }}">
+
+        <label>강수량(mm)</label>
+        <input type="number" step="0.1" name="rain" required value="{{ rain|default:'' }}">
+
+        <label>주소 <span style="font-size:0.95em;color:#64748b;">(예: 서울특별시 광진구 xx동)</span></label>
+        <input type="text" name="address" required value="{{ address|default:'' }}" placeholder="서울특별시 광진구 xx동">
+
+        <button type="submit" name="predict" class="main-btn">예측하기</button>
+    </form>
+
+    {% if result_date %}
+    <div class="result-section">
+        <div class="result-badge">입력값 요약</div>
+        <ul class="result-list">
+            <li><span class="icon">📅</span> <b>날짜:</b> {{ result_date }}</li>
+            <li><span class="icon">⏰</span> <b>시간:</b> {{ result_time }}시</li>
+            <li><span class="icon">🌡️</span> <b>기온:</b> {{ temp }}℃</li>
+            <li><span class="icon">💧</span> <b>강수량:</b> {{ rain }}mm</li>
+            <li><span class="icon">📍</span> <b>주소:</b> {{ address }}</li>
+            {% if coordinates %}
+            <li><span class="icon">🗺️</span> <b>좌표:</b> {{ coordinates.lat|floatformat:6 }}, {{ coordinates.lng|floatformat:6 }}</li>
+            {% endif %}
+        </ul>
+        <div class="result-badge" style="margin-top:18px;">예측 결과</div>
+        {% if ai_result %}
+        <div style="margin:18px 0;">
+            {% if ai_result.error %}
+            <span style="color:red">API 오류: {{ ai_result.error }}</span>
+            {% else %}
+            <ul class="result-list">
+                <li><b>분류 확률:</b> {{ ai_result.probability_percent }}%</li>
+                <li><b>예측값:</b> {{ ai_result.raw_prediction }}</li>
+                <li><b>최종 기대 민원:</b> {{ ai_result.expected_violations }}</li>
+            </ul>
+            <form method="post" style="margin-top:18px;">
+                {% csrf_token %}
+                <input type="hidden" name="day" value="{{ result_date }}">
+                <input type="hidden" name="hour" value="{{ result_time }}">
+                <input type="hidden" name="temp" value="{{ temp }}">
+                <input type="hidden" name="rain" value="{{ rain }}">
+                <input type="hidden" name="address" value="{{ address }}">
+                {% if coordinates %}
+                <input type="hidden" name="latitude" value="{{ coordinates.lat }}">
+                <input type="hidden" name="longitude" value="{{ coordinates.lng }}">
+                {% endif %}
+                <input type="hidden" name="probability_percent" value="{{ ai_result.probability_percent }}">
+                <input type="hidden" name="raw_prediction" value="{{ ai_result.raw_prediction }}">
+                <input type="hidden" name="expected_violations" value="{{ ai_result.expected_violations }}">
+                <button type="submit" name="save" class="save-btn">저장하기</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

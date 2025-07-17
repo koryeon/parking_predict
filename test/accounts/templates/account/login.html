@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+{% load static %}
+
+{% block title %}로그인 | PARKING PREDICT{% endblock %}
+
+{% block extra_style %}
+    <style>
+        body { background: #f8fafc; }
+        .login-container {
+            max-width: 350px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(30,41,59,0.08);
+            padding: 36px 30px 28px 30px;
+        }
+        h2 { text-align: center; margin-bottom: 24px; color: #1e293b; }
+        form label { display: block; margin: 16px 0 6px 0; color: #334155; font-weight: 500; }
+        form input[type="text"], form input[type="password"] {
+            width: 93%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            background: #f1f5f9;
+        }
+        form input:focus { border: 1.5px solid #38bdf8; outline: none; }
+        button[type="submit"] {
+            width: 100%;
+            background: #38bdf8;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: background 0.2s;
+            display: block;
+        }
+        button[type="submit"]:hover { background: #0ea5e9; }
+
+        /* 회원가입+소셜 안내 한 줄 배치 */
+        .signup-social-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .signup-btn {
+            width: 110px;
+            background: #64748b;
+            color: #fff;
+            border: none;
+            padding: 7px 0;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(30,41,59,0.04);
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .signup-btn:hover { background: #334155; }
+        .social-guide {
+            color: #64748b;
+            font-size: 0.97em;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* 소셜 버튼 2개를 한 줄에, 로그인 버튼의 절반씩 */
+        .social-login-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 22px;
+            margin-bottom: 10px;
+        }
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48%;        /* 로그인 버튼의 절반(100%/2 - gap) */
+            min-width: 70px;
+            height: 48px;
+            border-radius: 8px;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(30,41,59,0.06);
+        }
+        .social-btn:focus, .social-btn:hover {
+            box-shadow: 0 4px 16px rgba(30,41,59,0.13);
+        }
+        .kakao {
+            background: #fee500;
+            border: 1.5px solid #e0c200;
+        }
+        .naver {
+            background: #03c75a;
+            border: 1.5px solid #03c75a;
+        }
+        .social-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        @media (max-width: 400px) {
+            .login-container { padding: 18px 4vw 18px 4vw; }
+            .social-btn { min-width: 50px; height: 40px; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="login-container">
+        <h2>로그인</h2>
+        <form method="post" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <label for="id_login">아이디</label>
+            <input type="text" name="login" id="id_login" required autofocus>
+
+            <label for="id_password">비밀번호</label>
+            <input type="password" name="password" id="id_password" required>
+
+            <button type="submit">로그인</button>
+        </form>
+
+        <div class="signup-social-row">
+            <a class="signup-btn" href="{% url 'account_signup' %}">회원가입</a>
+            <span class="social-guide">또는 소셜 계정으로 로그인</span>
+        </div>
+
+        <div class="social-login-row">
+            <a class="social-btn kakao" href="{% provider_login_url 'kakao' %}">
+                <img src="{% static 'images/kakao_login.png' %}" alt="카카오 로그인">
+            </a>
+            <a class="social-btn naver" href="{% provider_login_url 'naver' %}">
+                <img src="{% static 'images/naver_login.png' %}" alt="네이버 로그인">
+            </a>
+        </div>
+    </div>
+{% endblock %}
