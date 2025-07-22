@@ -79,3 +79,4 @@ yarg==0.1.9
 gunicorn
 opencensus==0.11.3
 opencensus-ext-azure==1.1.11
+opencensus-ext-django
