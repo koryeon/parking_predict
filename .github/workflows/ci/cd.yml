@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: kimhyoyeon
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # parkapp2ai 이미지 빌드 & 푸시 (AI 서버)
+    - name: Build and push parkapp2ai Docker image
+      run: |
+        docker build -t kimhyoyeon/parkapp2ai:latest ./PL
+        docker push kimhyoyeon/parkapp2ai:latest
+
+    # parkapp2 이미지 빌드 & 푸시 (웹 서버)
+    - name: Build and push parkapp2 Docker image
+      run: |
+        docker build -t kimhyoyeon/parkapp2:latest ./web
+        docker push kimhyoyeon/parkapp2:latest
+
+    # AKS context 설정
+    - name: Set AKS context
+      uses: azure/aks-set-context@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        cluster-name: park-kube
+        resource-group: park-rg_group
+
+    # Kubernetes에 AI 서버 배포
+    - name: Deploy AI server to AKS
+      run: |
+        kubectl apply -f k8s/parkapp2ai-deployment.yaml
+
+    # Kubernetes에 웹 서버 배포
+    - name: Deploy Web server to AKS
+      run: |
+        kubectl apply -f k8s/parkapp2-deployment.yaml

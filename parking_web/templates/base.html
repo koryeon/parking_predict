@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PARKING PREDICT{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+        }
+        .navbar .logo a {
+    text-decoration: none;        /* 기본 밑줄 제거 */
+    color: inherit;              /* 부모 색상 상속 */
+    transition: none;            /* 호버 애니메이션 제거 */
+}
+
+.navbar .logo a:hover {
+    text-decoration: none;        /* 호버 시 밑줄 제거 */
+    color: inherit;              /* 호버 시 색상 변경 방지 */
+}
+
+.navbar .logo a:visited {
+    color: inherit;              /* 방문한 링크 색상 변경 방지 */
+}
+
+.navbar .logo a:link {
+    color: inherit;              /* 링크 색상 변경 방지 */
+}
+
+.navbar .logo a:active {
+    color: inherit;              /* 클릭 시 색상 변경 방지 */
+}
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            background-color: #1e293b;
+            color: #fff;
+            padding: 0 30px;
+            height: 60px;
+            box-shadow: 0 2px 8px rgba(30,41,59,0.05);
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        .navbar .logo {
+            font-weight: bold;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            color: #38bdf8;
+            z-index: 2;
+        }
+        .navbar-center {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .navbar-center a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.05rem;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar-center a:hover, .navbar-center a.active {
+            background: #38bdf8;
+            color: #1e293b;
+        }
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 2;
+        }
+        .nickname-highlight {
+            font-weight: bold;
+            color: #facc15;
+            background: #1e293b;
+            border: 1.5px solid #facc15;
+            border-radius: 16px;
+            padding: 4px 14px;
+            margin-right: 6px;
+            font-size: 1.07rem;
+            letter-spacing: 0.5px;
+        }
+        .navbar-right a {
+            color: #fff;
+            background: #334155;
+            border-radius: 4px;
+            padding: 7px 16px;
+            text-decoration: none;
+            font-size: 1.05rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar-right a:hover {
+            background: #38bdf8;
+            color: #1e293b;
+        }
+        /* 본문 가운데 정렬 및 박스 스타일 */
+        .main-container {
+            max-width: 900px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            padding: 36px 28px;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(30,41,59,0.07);
+            min-height: 400px;
+        }
+        @media (max-width: 1000px) {
+            .main-container {
+                max-width: 98vw;
+                padding: 16px 4vw;
+            }
+        }
+        @media (max-width: 900px) {
+            .navbar { flex-direction: column; height: auto; padding: 0 10px; }
+            .navbar .logo { margin-bottom: 6px; }
+            .navbar-center { position: static; transform: none; margin: 8px 0; gap: 12px; }
+            .navbar-right { margin-top: 6px; }
+        }
+    </style>
+    {% block extra_style %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><a href="{% url 'park:park' %}">🚗 PARKING PREDICT</a></div>
+        <div class="navbar-center">
+            <a href="{% url 'park:park' %}">예측</a>
+            <a href="{% url 'map:map' %}">주차장위치</a>
+            <a href="{% url 'schedule:schedule' %}">스케쥴</a>
+        </div>
+        <div class="navbar-right">
+            {% if user.is_authenticated %}
+    <span class="nickname-highlight">{{ user.username }}님</span>
+    <a href="{% url 'account_logout' %}">로그아웃</a>
+{% else %}
+    <a href="{% url 'account_login' %}">로그인</a>
+{% endif %}
+
+        </div>
+    </nav>
+    <div class="main-container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

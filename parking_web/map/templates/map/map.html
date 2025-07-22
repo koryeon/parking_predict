@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% block title %}서울시 주차장 지도{% endblock %}
+
+{% block extra_style %}
+    <style>
+        .main-container {
+            max-width: 760px;
+            margin: 36px auto 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(30,41,59,0.09);
+            padding: 36px 32px 32px 32px;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 1.7rem;
+            color: #1e293b;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        #map {
+            width: 100%;
+            max-width: 700px;
+            height: 420px;
+            margin: 0 auto 20px auto;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(30,41,59,0.05);
+        }
+        #my-location {
+            margin: 26px auto 32px auto;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 32px;
+            box-shadow: 0 8px 32px rgba(56,189,248,0.15), 0 2px 8px rgba(30,41,59,0.08);
+            border: 2px solid #38bdf8;
+            max-width: 480px;
+            letter-spacing: 0.01em;
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        #my-location::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #38bdf8, #0ea5e9, #06b6d4);
+            border-radius: 16px;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        #my-location:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(56,189,248,0.2), 0 4px 12px rgba(30,41,59,0.1);
+        }
+        .location-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .loc-icon {
+            font-size: 1.5em;
+            margin-right: 8px;
+            color: #38bdf8;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .loc-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        .loc-address {
+            font-size: 1.1rem;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .loc-coord {
+            font-size: 0.95em;
+            color: #64748b;
+            font-family: 'Fira Mono', 'Menlo', 'Consolas', monospace;
+            background: rgba(241, 245, 249, 0.8);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 4px;
+            letter-spacing: 0.02em;
+            border: 1px solid #e2e8f0;
+            backdrop-filter: blur(4px);
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #parking-list {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(30,41,59,0.04);
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 8px 4px;
+            font-size: 14px;
+        }
+        th {
+            background: #e0e7ef;
+            color: #374151;
+            font-weight: 600;
+        }
+        tr.highlight {
+            background: #ffe082;
+        }
+        tr:hover {
+            background: #e0f2fe;
+        }
+        @media (max-width: 800px) {
+            .main-container, #parking-list, #map { max-width: 100%; padding: 12px; }
+        }
+        @media (max-width: 600px) {
+            .main-container { padding: 10px 2vw; }
+            #map { height: 320px; }
+            #my-location {
+                max-width: 90%;
+                padding: 20px 24px;
+            }
+            .loc-address {
+                font-size: 1rem;
+            }
+            .loc-coord {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="main-container">
+        <h1>서울시 주차장 위치 안내</h1>
+        <div id="map"></div>
+        <div id="my-location">
+            <div class="location-header">
+                <span class="loc-icon">📍</span>
+                <h3 class="loc-title">내 위치</h3>
+            </div>
+            <div class="loc-address">
+                <span class="loading-spinner"></span>
+                위치 정보를 불러오는 중...
+            </div>
+            <div class="loc-coord" style="display: none;"></div>
+        </div>
+        <div id="parking-list"></div>
+    </div>
+    <script type="text/javascript">
+    const KAKAO_JS_KEY = "{{ kakao_js_key }}";
+</script>
+    <!-- 수정: Django 템플릿 변수를 올바르게 사용 -->
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_js_key|safe }}&libraries=services&autoload=false"></script>
+    <script>
+      const KAKAO_API_KEY = '{{ kakao_js_key }}';
+      
+      kakao.maps.load(function() {
+        var container = document.getElementById('map');
+        var options = {
+          center: new kakao.maps.LatLng(37.5665, 126.9780),
+          level: 7
+        };
+        var map = new kakao.maps.Map(container, options);
+
+        // Django에서 넘긴 주차장 데이터
+        var positions = [
+          {% for p in parking_list %}
+          {
+            lat: {{ p.lat }},
+            lng: {{ p.lng }},
+            name: "{{ p.name }}",
+            addr: "{{ p.addr }}",
+            now_cnt: "{{ p.now_cnt }}",
+            total_cnt: "{{ p.total_cnt }}"
+          }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ];
+
+        // 지도에 주차장 마커 표시
+        var markers = [];
+        positions.forEach(function(pos) {
+          var marker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(pos.lat, pos.lng),
+            title: pos.name
+          });
+          var infowindow = new kakao.maps.InfoWindow({
+            content: `<div style="padding:5px;font-size:13px;">
+                        <b>${pos.name}</b><br>
+                        주소: ${pos.addr}<br>
+                        실시간/총: ${pos.now_cnt} / ${pos.total_cnt}
+                      </div>`
+          });
+          kakao.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map, marker);
+          });
+          markers.push(marker);
+        });
+
+        // 개선된 주소 변환 함수
+        async function getAddressFromCoords(lat, lng) {
+            // 1차 시도: SDK 방법
+            try {
+                if (kakao.maps.services) {
+                    return await new Promise((resolve, reject) => {
+                        var geocoder = new kakao.maps.services.Geocoder();
+                        geocoder.coord2Address(lng, lat, function(result, status) {
+                            if (status === kakao.maps.services.Status.OK) {
+                                var addr = result[0].address;
+                                var fullAddress = addr.region_1depth_name + ' ' + 
+                                                addr.region_2depth_name + ' ' + 
+                                                addr.region_3depth_name;
+                                resolve(fullAddress);
+                            } else {
+                                reject('SDK 변환 실패');
+                            }
+                        });
+                    });
+                } else {
+                    throw new Error('services 라이브러리 없음');
+                }
+            } catch (error) {
+                console.log('SDK 방법 실패, REST API 시도');
+                
+                // 2차 시도: REST API 방법
+                try {
+                    const response = await fetch(`https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}`, {
+                        headers: {
+                            'Authorization': `KakaoAK ${KAKAO_API_KEY}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.documents && data.documents.length > 0) {
+                        const addr = data.documents[0].address;
+                        return addr.region_1depth_name + ' ' + 
+                               addr.region_2depth_name + ' ' + 
+                               addr.region_3depth_name;
+                    } else {
+                        throw new Error('주소를 찾을 수 없습니다.');
+                    }
+                } catch (restError) {
+                    console.error('REST API도 실패:', restError);
+                    throw new Error('모든 주소 변환 방법 실패');
+                }
+            }
+        }
+
+        // 내 위치 받아오기 및 가까운 주차장 계산
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(async function(position) {
+            var myLat = position.coords.latitude;
+            var myLng = position.coords.longitude;
+            
+            try {
+                // 주소 변환
+                const address = await getAddressFromCoords(myLat, myLng);
+                
+                // HTML 업데이트
+                document.querySelector('.loc-address').innerHTML = address;
+                document.querySelector('.loc-coord').innerHTML = 
+                    `(${myLat.toFixed(6)}, ${myLng.toFixed(6)})`;
+                document.querySelector('.loc-coord').style.display = 'block';
+                
+            } catch (error) {
+                document.querySelector('.loc-address').innerHTML = 
+                    '주소를 가져올 수 없습니다.';
+                document.querySelector('.loc-coord').innerHTML = 
+                    `(${myLat.toFixed(6)}, ${myLng.toFixed(6)})`;
+                document.querySelector('.loc-coord').style.display = 'block';
+            }
+
+            // 내 위치 마커 표시
+            var myMarker = new kakao.maps.Marker({
+              map: map,
+              position: new kakao.maps.LatLng(myLat, myLng),
+              image: new kakao.maps.MarkerImage(
+                'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+                new kakao.maps.Size(24, 35)
+              )
+            });
+            map.setCenter(new kakao.maps.LatLng(myLat, myLng));
+
+            // 거리 계산 함수 (하버사인 공식)
+            function getDistance(lat1, lng1, lat2, lng2) {
+              function toRad(x) { return x * Math.PI / 180; }
+              var R = 6371; // km
+              var dLat = toRad(lat2 - lat1);
+              var dLng = toRad(lng2 - lng1);
+              var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+              var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              return R * c;
+            }
+
+            // 각 주차장과 내 위치 거리 계산
+            positions.forEach(function(pos) {
+              pos.distance = getDistance(myLat, myLng, pos.lat, pos.lng);
+            });
+
+            // 가까운 순 정렬 후 10개만 추림
+            var sorted = positions.slice().sort(function(a, b) {
+              return a.distance - b.distance;
+            }).slice(0, 10);
+
+            // 지도 마커와 리스트 연동
+            function focusMarker(idx) {
+              var pos = sorted[idx];
+              map.panTo(new kakao.maps.LatLng(pos.lat, pos.lng));
+              kakao.maps.event.trigger(markers[positions.indexOf(pos)], 'click');
+              // 리스트 강조
+              var rows = document.querySelectorAll('#parking-list tr');
+              rows.forEach(function(row){ row.classList.remove('highlight'); });
+              rows[idx+1].classList.add('highlight');
+            }
+
+            // 리스트 HTML 생성
+            var html = '<table><tr><th>순위</th><th>주차장명</th><th>주소</th><th>실시간/총</th><th>거리(km)</th></tr>';
+            sorted.forEach(function(pos, i) {
+              html += `<tr onclick="focusMarker(${i})" style="cursor:pointer;">
+                        <td>${i+1}</td>
+                        <td>${pos.name}</td>
+                        <td>${pos.addr}</td>
+                        <td>${pos.now_cnt} / ${pos.total_cnt}</td>
+                        <td>${pos.distance.toFixed(2)}</td>
+                      </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('parking-list').innerHTML = html;
+
+            // focusMarker 함수 전역 등록
+            window.focusMarker = focusMarker;
+          }, function() {
+            document.querySelector('.loc-address').innerHTML = 
+                '위치 정보를 불러올 수 없습니다.';
+            document.querySelector('.loc-coord').style.display = 'none';
+          });
+        } else {
+          document.querySelector('.loc-address').innerHTML = 
+              '브라우저가 위치 정보를 지원하지 않습니다.';
+          document.querySelector('.loc-coord').style.display = 'none';
+        }
+      });
+    </script>
+{% endblock %}

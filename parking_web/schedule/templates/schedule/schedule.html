@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}스케쥴 달력{% endblock %}
+
+{% block extra_style %}
+<style>
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(30,41,59,0.08);
+    padding: 32px 28px 24px 28px;
+}
+h1 {
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 24px;
+    font-size: 1.7rem;
+}
+.calendar-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.calendar-controls select {
+    font-size: 1.05rem;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    font-size: 1.15rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+.calendar .day, .calendar .date {
+    text-align: center;
+    padding: 11px 0;
+}
+.calendar .day {
+    color: #2563eb;
+    font-weight: bold;
+    background: #f1f5f9;
+    border-radius: 6px;
+}
+.calendar .date {
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-height: 48px;
+    position: relative;
+}
+.calendar .date.has-pred {
+    background: #ffe066;
+    color: #1e293b;
+}
+.calendar .date.has-pred::after {
+    content: "●";
+    font-size: 0.8em;
+    color: #f59e42;
+    position: absolute;
+    right: 8px; bottom: 6px;
+}
+.calendar .date.selected {
+    background: #bae6fd;
+    color: #0c4a6e;
+    font-weight: bold;
+}
+.calendar .date.today {
+    border: 2px solid #38bdf8;
+}
+.memo-section {
+    margin-top: 20px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 18px 12px 12px 12px;
+    box-shadow: 0 2px 8px rgba(30,41,59,0.05);
+}
+.memo-section label {
+    font-weight: 500;
+    color: #334155;
+}
+.memo-list {
+    margin-top: 18px;
+    background: #fff;
+    border-radius: 7px;
+    padding: 10px;
+    min-height: 30px;
+    color: #0f172a;
+    box-shadow: 0 1px 4px rgba(30,41,59,0.04);
+    word-break: break-all;
+}
+@media (max-width: 600px) {
+    .container { padding: 16px 6px; }
+    .calendar { font-size: 1rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>스케쥴</h1>
+    <div class="calendar-controls">
+        <select id="year-select"></select>
+        <select id="month-select"></select>
+    </div>
+    <div id="calendar" class="calendar"></div>
+
+    <div class="memo-section">
+        <label id="memo-label">예측 기록 (<span id="selected-date"></span>)</label>
+        <div id="prediction-list" class="memo-list">날짜를 선택하세요</div>
+    </div>
+</div>
+<script>
+const predictionsByDate = {{ predictions_by_date_json|safe }};
+const calendarEl = document.getElementById('calendar');
+const yearSelect = document.getElementById('year-select');
+const monthSelect = document.getElementById('month-select');
+const today = new Date();
+let currentYear = today.getFullYear();
+let currentMonth = today.getMonth();
+let selectedDate = null;
+
+function populateYearMonth() {
+    yearSelect.innerHTML = '';
+    monthSelect.innerHTML = '';
+    const thisYear = today.getFullYear();
+    for (let y = thisYear - 3; y <= thisYear + 3; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y + '년';
+        if (y === currentYear) opt.selected = true;
+        yearSelect.appendChild(opt);
+    }
+    for (let m = 0; m < 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = (m + 1) + '월';
+        if (m === currentMonth) opt.selected = true;
+        monthSelect.appendChild(opt);
+    }
+}
+yearSelect.addEventListener('change', function() {
+    currentYear = parseInt(yearSelect.value);
+    renderCalendar(currentYear, currentMonth);
+});
+monthSelect.addEventListener('change', function() {
+    currentMonth = parseInt(monthSelect.value);
+    renderCalendar(currentYear, currentMonth);
+});
+
+function renderCalendar(year, month) {
+    calendarEl.innerHTML = '';
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    // 요일 헤더
+    days.forEach(day => {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'day';
+        dayEl.textContent = day;
+        calendarEl.appendChild(dayEl);
+    });
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    // 첫 주 빈칸
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'date empty';
+        calendarEl.appendChild(empty);
+    }
+    for (let date = 1; date <= lastDate; date++) {
+        const dateEl = document.createElement('div');
+        dateEl.className = 'date';
+        dateEl.textContent = date;
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(date).padStart(2,'0')}`;
+        if (predictionsByDate[dateStr] && predictionsByDate[dateStr].length > 0) {
+            dateEl.classList.add('has-pred');
+        }
+        dateEl.onclick = function() {
+            selectDate(dateStr, dateEl);
+        };
+        if (
+            year === today.getFullYear() &&
+            month === today.getMonth() &&
+            date === today.getDate()
+        ) {
+            dateEl.classList.add('today');
+        }
+        if (selectedDate === dateStr) {
+            dateEl.classList.add('selected');
+        }
+        calendarEl.appendChild(dateEl);
+    }
+}
+function selectDate(dateStr, dateEl) {
+    selectedDate = dateStr;
+    document.getElementById('selected-date').textContent = dateStr;
+    document.querySelectorAll('.calendar .date').forEach(el => el.classList.remove('selected'));
+    dateEl.classList.add('selected');
+    showPrediction(dateStr);
+}
+
+function showPrediction(dateStr) {
+    const predListDiv = document.getElementById('prediction-list');
+    predListDiv.innerHTML = '';
+    if (predictionsByDate[dateStr] && predictionsByDate[dateStr].length > 0) {
+        predictionsByDate[dateStr].forEach((p, idx) => {
+            predListDiv.innerHTML += `
+                <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div><b>시간:</b> ${p.time} | <b>기온:</b> ${p.temp}℃ | <b>강수량:</b> ${p.rain}mm</div>
+                    <div style="margin-top:5px;"><b>📍 주소:</b> ${p.address}</div>
+                    ${p.latitude && p.longitude ? `<div style="margin-top:3px; font-size:0.9em; color:#666;"><b>🗺️ 좌표:</b> ${parseFloat(p.latitude).toFixed(6)}, ${parseFloat(p.longitude).toFixed(6)}</div>` : ''}
+                    <div style="margin-top:8px;">
+                        <b>분류 확률:</b> ${p.probability_percent}%<br>
+                        <b>예측값:</b> ${p.raw_prediction}<br>
+                        <b>최종 기대 민원:</b> ${p.expected_violations}
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        predListDiv.innerHTML = "예측 기록이 없습니다.";
+    }
+}
+
+populateYearMonth();
+renderCalendar(currentYear, currentMonth);
+
+window.addEventListener('DOMContentLoaded', function() {
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    setTimeout(() => {
+        const dateEls = document.querySelectorAll('.calendar .date');
+        dateEls.forEach(el => {
+            if (el.textContent === String(today.getDate())) {
+                el.click();
+            }
+        });
+    }, 0);
+});
+</script>
+{% endblock %}
