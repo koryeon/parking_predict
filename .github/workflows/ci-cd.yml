@@ -45,6 +45,10 @@ jobs:
         kubectl apply -f PL/k8s/ai-deployment.yaml
         kubectl apply -f PL/k8s/ai-service.yaml
 
+    # Kubernetes에 웹 서버 배포 전, 디버깅용 확인
+    - name: Check contents of k8s folder
+      run: ls -al ./web/k8s && cat ./web/k8s/service.yaml
+
     # Kubernetes에 웹 서버 배포
     - name: Deploy Web server to AKS
       run: |
