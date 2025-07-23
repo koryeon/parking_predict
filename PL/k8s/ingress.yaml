@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: parkapp-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - parkingpredict.store
+      secretName: parkingpredict-tls
+  rules:
+    - host: parkingpredict.store
+      http:
+        paths:
+          - path: /static
+            pathType: Prefix
+            backend:
+              service:
+                name: parkapp2-service
+                port:
+                  number: 80
+
+          - path: /media
+            pathType: Prefix
+            backend:
+              service:
+                name: parkapp2-service
+                port:
+                  number: 80
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: parkapp2-service
+                port:
+                  number: 80

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parkapp2-deployment
+  labels:
+    app: parkapp2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parkapp2
+  template:
+    metadata:
+      labels:
+        app: parkapp2
+    spec:
+      containers:
+        - name: parkapp2
+          image: kimhyoyeon/parkapp2:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: parkapp2-secret-env
+      imagePullSecrets:
+        - name: regcred
