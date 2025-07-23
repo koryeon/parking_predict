@@ -55,6 +55,10 @@ jobs:
         kubectl apply -f web/k8s/deployment.yaml
         kubectl apply -f web/k8s/service.yaml
 
+    # 파크앱 웹서버 배포 강제 재시작
+    - name: Restart deployment (force apply)
+      run: kubectl rollout restart deployment parkapp2-deployment -n default
+
     # 공통 Ingress 설정 적용
     - name: Apply Ingress
       run: |
