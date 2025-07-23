@@ -16,7 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-@i!##57i$+5$-w_&4+1-mjjo_xcci8e@ea54^n73!-2nx0b%_w'
 
-DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'parkingpredict.store', 'www.parkingpredict.store', '20.249.170.4']
 
@@ -33,7 +32,7 @@ KAKAO_REST_API_JS_KEY = os.getenv("KAKAO_REST_API_JS_KEY")
 APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
 
 INSTALLED_APPS = [
-    'park',
+    'park.apps.ParkConfig',
     'map',
     'schedule',
     'accounts',
@@ -121,14 +120,20 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'web' / 'static']
-STATIC_ROOT = BASE_DIR / 'web' / 'staticfiles'
+# settings.py (배포용)
+DEBUG = False
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 여기에 모임
+
+# STATICFILES_DIRS에 STATIC_ROOT가 포함되면 안 됨!
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'static'),  # source files
+#]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True #배포할때 True로 바꾸기
 
 APPEND_SLASH = True
 # ✅ 배포 환경에서 꼭 있어야 할 설정

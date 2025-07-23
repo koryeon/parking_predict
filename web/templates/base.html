@@ -8,34 +8,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
             background: #f8f8f8;
             font-family: 'Noto Sans KR', Arial, sans-serif;
         }
         .navbar .logo a {
-    text-decoration: none;        /* 기본 밑줄 제거 */
-    color: inherit;              /* 부모 색상 상속 */
-    transition: none;            /* 호버 애니메이션 제거 */
-}
-
-.navbar .logo a:hover {
-    text-decoration: none;        /* 호버 시 밑줄 제거 */
-    color: inherit;              /* 호버 시 색상 변경 방지 */
-}
-
-.navbar .logo a:visited {
-    color: inherit;              /* 방문한 링크 색상 변경 방지 */
-}
-
-.navbar .logo a:link {
-    color: inherit;              /* 링크 색상 변경 방지 */
-}
-
-.navbar .logo a:active {
-    color: inherit;              /* 클릭 시 색상 변경 방지 */
-}
-
+            text-decoration: none;        /* 기본 밑줄 제거 */
+            color: inherit;              /* 부모 색상 상속 */
+            transition: none;            /* 호버 애니메이션 제거 */
+        }
+        .navbar .logo a:hover {
+            text-decoration: none;        /* 호버 시 밑줄 제거 */
+            color: inherit;              /* 호버 시 색상 변경 방지 */
+        }
+        .navbar .logo a:visited {
+            color: inherit;              /* 방문한 링크 색상 변경 방지 */
+        }
+        .navbar .logo a:link {
+            color: inherit;              /* 링크 색상 변경 방지 */
+        }
+        .navbar .logo a:active {
+            color: inherit;              /* 클릭 시 색상 변경 방지 */
+        }
         .navbar {
             display: flex;
             align-items: center;
@@ -111,12 +107,14 @@
         /* 본문 가운데 정렬 및 박스 스타일 */
         .main-container {
             max-width: 900px;
-            margin: 40px auto 0 auto;
+            margin: 0 auto;
             background: #fff;
             padding: 36px 28px;
             border-radius: 14px;
             box-shadow: 0 4px 24px rgba(30,41,59,0.07);
-            min-height: 400px;
+            min-height: calc(100vh - 60px);
+            overflow: auto;
+            box-sizing: border-box;
         }
         @media (max-width: 1000px) {
             .main-container {
@@ -143,12 +141,11 @@
         </div>
         <div class="navbar-right">
             {% if user.is_authenticated %}
-    <span class="nickname-highlight">{{ user.username }}님</span>
-    <a href="{% url 'account_logout' %}">로그아웃</a>
-{% else %}
-    <a href="{% url 'account_login' %}">로그인</a>
-{% endif %}
-
+                <span class="nickname-highlight">{{ user.username }}님</span>
+                <a href="{% url 'account_logout' %}">로그아웃</a>
+            {% else %}
+                <a href="{% url 'account_login' %}">로그인</a>
+            {% endif %}
         </div>
     </nav>
     <div class="main-container">

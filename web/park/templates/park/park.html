@@ -10,6 +10,7 @@
         border-radius: 12px;
         box-shadow: 0 4px 24px rgba(30,41,59,0.09);
         padding: 32px 28px 24px 28px;
+        position: relative;
     }
     h1 {
         text-align: center;
@@ -122,7 +123,20 @@
     }
     .result-list li .icon {
         font-size: 1.1em;
-        margin-right: 2px;
+    }
+    .back-btn {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: none;
+        border: none;
+        color: #0f172a;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .back-btn:hover {
+        color: #0ea5e9;
     }
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px);}
@@ -134,28 +148,34 @@
 </style>
 
 <div class="container">
+    {% if not result_date %}
+    <!-- 입력 폼 -->
     <h1>불법주정차 예측 서비스</h1>
     <form method="post">
         {% csrf_token %}
         <label>날짜 <span style="font-size:0.95em;color:#64748b;">(예: 2025-07-07)</span></label>
-        <input type="date" name="day" required value="{{ result_date|default:'' }}">
+        <input type="date" name="day" required>
 
         <label>시간 <span style="font-size:0.95em;color:#64748b;">(0~23시)</span></label>
-        <input type="number" name="hour" min="0" max="23" required value="{{ result_time|default:0 }}">
+        <input type="number" name="hour" min="0" max="23" required>
 
         <label>기온(℃)</label>
-        <input type="number" step="0.1" name="temp" required value="{{ temp|default:'' }}">
+        <input type="number" step="0.1" name="temp" required>
 
         <label>강수량(mm)</label>
-        <input type="number" step="0.1" name="rain" required value="{{ rain|default:'' }}">
+        <input type="number" step="0.1" name="rain" required>
 
-        <label>주소 <span style="font-size:0.95em;color:#64748b;">(예: 서울특별시 광진구 xx동)</span></label>
-        <input type="text" name="address" required value="{{ address|default:'' }}" placeholder="서울특별시 광진구 xx동">
+        <label>주소</label>
+        <input type="text" name="address" required placeholder="서울특별시 광진구 xx동">
 
         <button type="submit" name="predict" class="main-btn">예측하기</button>
     </form>
+    {% else %}
+    <!-- 결과 보기 -->
+    <form method="get">
+        <button class="back-btn">← 돌아가기</button>
+    </form>
 
-    {% if result_date %}
     <div class="result-section">
         <div class="result-badge">입력값 요약</div>
         <ul class="result-list">
@@ -168,35 +188,33 @@
             <li><span class="icon">🗺️</span> <b>좌표:</b> {{ coordinates.lat|floatformat:6 }}, {{ coordinates.lng|floatformat:6 }}</li>
             {% endif %}
         </ul>
-        <div class="result-badge" style="margin-top:18px;">예측 결과</div>
+
         {% if ai_result %}
-        <div style="margin:18px 0;">
-            {% if ai_result.error %}
-            <span style="color:red">API 오류: {{ ai_result.error }}</span>
-            {% else %}
-            <ul class="result-list">
-                <li><b>분류 확률:</b> {{ ai_result.probability_percent }}%</li>
-                <li><b>예측값:</b> {{ ai_result.raw_prediction }}</li>
-                <li><b>최종 기대 민원:</b> {{ ai_result.expected_violations }}</li>
-            </ul>
-            <form method="post" style="margin-top:18px;">
-                {% csrf_token %}
-                <input type="hidden" name="day" value="{{ result_date }}">
-                <input type="hidden" name="hour" value="{{ result_time }}">
-                <input type="hidden" name="temp" value="{{ temp }}">
-                <input type="hidden" name="rain" value="{{ rain }}">
-                <input type="hidden" name="address" value="{{ address }}">
-                {% if coordinates %}
-                <input type="hidden" name="latitude" value="{{ coordinates.lat }}">
-                <input type="hidden" name="longitude" value="{{ coordinates.lng }}">
-                {% endif %}
-                <input type="hidden" name="probability_percent" value="{{ ai_result.probability_percent }}">
-                <input type="hidden" name="raw_prediction" value="{{ ai_result.raw_prediction }}">
-                <input type="hidden" name="expected_violations" value="{{ ai_result.expected_violations }}">
-                <button type="submit" name="save" class="save-btn">저장하기</button>
-            </form>
+        <div class="result-badge" style="margin-top:18px;">예측 결과</div>
+        {% if ai_result.error %}
+        <span style="color:red">API 오류: {{ ai_result.error }}</span>
+        {% else %}
+        <ul class="result-list">
+            <li><b>최종 기대 민원:</b> {{ ai_result.expected_violations }}건</li>
+        </ul>
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="day" value="{{ result_date }}">
+            <input type="hidden" name="hour" value="{{ result_time }}">
+            <input type="hidden" name="temp" value="{{ temp }}">
+            <input type="hidden" name="rain" value="{{ rain }}">
+            <input type="hidden" name="address" value="{{ address }}">
+            {% if coordinates %}
+            <input type="hidden" name="latitude" value="{{ coordinates.lat }}">
+            <input type="hidden" name="longitude" value="{{ coordinates.lng }}">
             {% endif %}
-        </div>
+            <input type="hidden" name="probability_percent" value="{{ ai_result.probability_percent }}">
+            <input type="hidden" name="raw_prediction" value="{{ ai_result.raw_prediction }}">
+            <input type="hidden" name="expected_violations" value="{{ ai_result.expected_violations }}">
+            <button type="submit" name="save" class="save-btn">저장하기</button>
+        </form>
+        {% endif %}
         {% endif %}
     </div>
     {% endif %}

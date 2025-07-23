@@ -4,7 +4,6 @@ metadata:
   name: parkapp-ingress
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
@@ -20,7 +19,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: parkapp2-service
+                name: nginx-static-service
                 port:
                   number: 80
 
