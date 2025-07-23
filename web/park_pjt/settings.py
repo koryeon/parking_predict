@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 import logging
+from opencensus.trace.samplers import ProbabilitySampler
 load_dotenv()
 
 logger = logging.getLogger(__name__)
@@ -144,7 +145,7 @@ OPENCENSUS = {
         'EXPORTER_ARGS': {
             'connection_string': APPLICATIONINSIGHTS_CONNECTION_STRING,
         },
-        'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler',
+        'SAMPLER': ProbabilitySampler,  # 문자열이 아닌 클래스 직접 할당
         'SAMPLER_ARGS': {
             'probability': 1.0,
         },
