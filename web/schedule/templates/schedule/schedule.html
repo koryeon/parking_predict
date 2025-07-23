@@ -221,9 +221,7 @@ function showPrediction(dateStr) {
                     <div style="margin-top:5px;"><b>📍 주소:</b> ${p.address}</div>
                     ${p.latitude && p.longitude ? `<div style="margin-top:3px; font-size:0.9em; color:#666;"><b>🗺️ 좌표:</b> ${parseFloat(p.latitude).toFixed(6)}, ${parseFloat(p.longitude).toFixed(6)}</div>` : ''}
                     <div style="margin-top:8px;">
-                        <b>분류 확률:</b> ${p.probability_percent}%<br>
-                        <b>예측값:</b> ${p.raw_prediction}<br>
-                        <b>최종 기대 민원:</b> ${p.expected_violations}
+                        <b>기대 민원:</b> ${p.expected_violations}
                     </div>
                 </div>
             `;
