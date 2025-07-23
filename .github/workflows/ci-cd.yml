@@ -42,9 +42,16 @@ jobs:
     # Kubernetes에 AI 서버 배포
     - name: Deploy AI server to AKS
       run: |
-        kubectl apply -f k8s/parkapp2ai-deployment.yaml
+        kubectl apply -f PL/k8s/parkapp2ai-deployment.yaml
+        kubectl apply -f PL/k8s/parkapp2ai-service.yaml
 
     # Kubernetes에 웹 서버 배포
     - name: Deploy Web server to AKS
       run: |
-        kubectl apply -f k8s/parkapp2-deployment.yaml
+        kubectl apply -f web/k8s/parkapp2-deployment.yaml
+        kubectl apply -f web/k8s/parkapp2-service.yaml
+
+    # 공통 Ingress 설정 적용
+    - name: Apply Ingress
+      run: |
+        kubectl apply -f common/k8s/ingress.yaml
