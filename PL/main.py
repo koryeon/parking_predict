@@ -45,7 +45,7 @@ def predict_cluster(lat, lng):
         return -1
 
 @app.post("/predict")
-def predict(input_ PredictRequest):
+def predict(input_data PredictRequest):
     logging.info("▶ 요청 도착: 입력 데이터 수신 완료")
     try:
         # 위도, 경도로 클러스터 계산
@@ -93,3 +93,5 @@ def predict(input_ PredictRequest):
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "message": "FastAPI AI 서버가 정상 동작 중입니다."}
+
+
