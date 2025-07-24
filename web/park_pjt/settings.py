@@ -124,7 +124,7 @@ USE_TZ = True
 DEBUG = False
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 여기에 모임
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # 여기에 모임
 
 # STATICFILES_DIRS에 STATIC_ROOT가 포함되면 안 됨!
 #STATICFILES_DIRS = [
@@ -143,16 +143,3 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_SECONDS = 3600
 
-# ✅ OpenCensus 설정 (Application Insights)
-OPENCENSUS = {
-    'TRACE': {
-        'EXPORTER': 'opencensus.ext.azure.trace_exporter.AzureExporter',
-        'EXPORTER_ARGS': {
-            'connection_string': APPLICATIONINSIGHTS_CONNECTION_STRING,
-        },
-        'SAMPLER': ProbabilitySampler,  # 문자열이 아닌 클래스 직접 할당
-        'SAMPLER_ARGS': {
-            'probability': 1.0,
-        },
-    }
-}
