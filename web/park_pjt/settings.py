@@ -1,9 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from opencensus.ext.azure.log_exporter import AzureLogHandler
 import logging
-from opencensus.trace.samplers import ProbabilitySampler
 load_dotenv()
 
 logger = logging.getLogger(__name__)
@@ -124,7 +122,7 @@ USE_TZ = True
 DEBUG = False
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # 여기에 모임
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 여기에 모임
 
 # STATICFILES_DIRS에 STATIC_ROOT가 포함되면 안 됨!
 #STATICFILES_DIRS = [
