@@ -3,6 +3,7 @@ import json
 from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required
 from .models import Prediction
+from django.conf import settings
 from django.shortcuts import render
 
 
@@ -27,5 +28,6 @@ def schedule(request):
         })
     context = {
         "predictions_by_date_json": mark_safe(json.dumps(predictions_by_date)),
+        "kakao_js_key": settings.KAKAO_REST_API_JS_KEY,  # 여기에 JS SDK 키 전달"
     }
     return render(request, "schedule/schedule.html", context)

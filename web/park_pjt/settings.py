@@ -4,11 +4,6 @@ from dotenv import load_dotenv
 import logging
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-logger.addHandler(
-    AzureLogHandler(connection_string=os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"))
-)
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,8 +42,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.kakao',
     'allauth.socialaccount.providers.naver',
 
-    # ✅ Application Insights용
-    'opencensus.ext.django',
 ]
 
 SITE_ID = 2
@@ -76,8 +69,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    # ✅ Application Insights 미들웨어 추가
-    'opencensus.ext.django.middleware.OpencensusMiddleware',
 ]
 
 ROOT_URLCONF = 'park_pjt.urls'
