@@ -104,12 +104,11 @@
             background: #38bdf8;
             color: #1e293b;
         }
-        /* 본문 가운데 정렬 및 박스 스타일 */
         .main-container {
             max-width: 900px;
             margin: 0 auto;
             background: #fff;
-            padding: 36px 28px;
+            padding: 12px 20px;  /* 🔽 위아래 패딩 줄임 */
             border-radius: 14px;
             box-shadow: 0 4px 24px rgba(30,41,59,0.07);
             min-height: calc(100vh - 60px);
@@ -119,7 +118,7 @@
         @media (max-width: 1000px) {
             .main-container {
                 max-width: 98vw;
-                padding: 16px 4vw;
+                padding: 8px 4vw;  /* 🔽 모바일 padding도 축소 */
             }
         }
         @media (max-width: 900px) {
